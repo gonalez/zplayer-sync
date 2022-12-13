@@ -2,3 +2,10 @@ rootProject.name = 'zplayer-sync'
 
 include 'api'
 include 'bukkit'
+
+// Built-in Extensions
+include ':extensions:data-mysql'
+
+// Built-in PlayersValueApis
+include ':values:basic-players-apivalues'
+

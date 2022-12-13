@@ -1,0 +1,10 @@
+repositories {
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    implementation(project(':api'))
+    compileOnly(libs['maven.org_spigotmc_spigot_api'])
+}
