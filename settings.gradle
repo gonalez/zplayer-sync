@@ -1,0 +1,4 @@
+rootProject.name = 'zplayer-sync'
+
+include 'api'
+include 'bukkit'

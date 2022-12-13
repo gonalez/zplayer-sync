@@ -1,0 +1,15 @@
+repositories {
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    implementation(libs['maven.com_google_auto_value_auto_value_annotations'],
+            libs['maven.org_spigotmc_spigot_api'])
+    annotationProcessor(libs['maven.com_google_auto_value_auto_value'])
+}
+
+shadowJar {
+    relocate 'com.google.auto', 'libs.com.google.auto'
+}

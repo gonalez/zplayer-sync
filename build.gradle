@@ -1,0 +1,50 @@
+buildscript {
+    repositories {
+        maven {
+            url = 'https://plugins.gradle.org/m2'
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.1"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+ext {
+    libs = project.properties
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    group = project.properties['group']
+    version = project.properties['version']
+
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+    }
+
+    dependencies {
+        compileOnly(libs['maven.com_google_code_findbugs_jsr305'])
+
+        testImplementation(libs['maven.org_junit_jupiter_junit_jupiter_api'],
+                libs['maven.org_mockito_mockito_core'],
+                libs['maven.org_mockito_mockito_junit_jupiter'])
+        testRuntimeOnly(libs['maven.org_junit_jupiter_junit_jupiter_engine'])
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
