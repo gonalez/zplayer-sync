@@ -36,9 +36,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /** The main class of the plugin. */
@@ -103,5 +101,10 @@ public class PlayerSyncPlugin extends JavaPlugin {
     } catch (Exception e) {
       throw new RuntimeException("Cannot initialize plugin", e);
     }
+  }
+
+  @Nullable
+  public PlayerSyncModule getPluginModule() {
+    return pluginModule;
   }
 }
