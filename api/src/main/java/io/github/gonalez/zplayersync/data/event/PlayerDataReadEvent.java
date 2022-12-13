@@ -15,12 +15,12 @@
  */
 package io.github.gonalez.zplayersync.data.event;
 
-import com.google.common.collect.ImmutableList;
 import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import java.util.List;
 import java.util.UUID;
 
 /** Event called when {@link io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter#read(UUID)}. */
@@ -28,13 +28,13 @@ public class PlayerDataReadEvent extends Event implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
 
   private final UUID playerUUID;
-  private final ImmutableList<PlayersValueApi<?>> valueApis;
+  private final List<PlayersValueApi<?>> valueApis;
 
   private boolean cancelled = false;
 
   public PlayerDataReadEvent(
       UUID playerUUID,
-      ImmutableList<PlayersValueApi<?>> valueApis) {
+      List<PlayersValueApi<?>> valueApis) {
     this.playerUUID = playerUUID;
     this.valueApis = valueApis;
   }
@@ -43,7 +43,7 @@ public class PlayerDataReadEvent extends Event implements Cancellable {
     return playerUUID;
   }
 
-  public ImmutableList<PlayersValueApi<?>> getValueApis() {
+  public List<PlayersValueApi<?>> getValueApis() {
     return valueApis;
   }
 

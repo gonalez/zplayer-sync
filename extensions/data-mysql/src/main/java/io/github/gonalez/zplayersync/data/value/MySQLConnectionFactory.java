@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 /** Implementation of connection factory for mysql connections. */
 public class MySQLConnectionFactory implements ConnectionFactory {
-  private final String path, url, username, password;
+  private final String url, username, password;
 
   public MySQLConnectionFactory(
       Path path,
@@ -40,7 +40,6 @@ public class MySQLConnectionFactory implements ConnectionFactory {
     if (!parentFile.exists() && !parentFile.mkdirs()) {
       throw new IOException("Failed to create parent file for path: " + path);
     }
-    this.path = path.toString();
     this.url = url;
     this.username = username;
     this.password = password;

@@ -16,20 +16,29 @@
 package io.github.gonalez.zplayersync;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
+import io.github.gonalez.zplayersync.data.value.ConnectionFactory;
+import io.github.gonalez.zplayersync.data.value.ExperiencePlayersValueApi;
 import io.github.gonalez.zplayersync.data.value.FoodPlayersValueApi;
 import io.github.gonalez.zplayersync.data.value.HealthPlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.InventoryPlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.LevelPlayersValueApi;
 import io.github.gonalez.zplayersync.data.value.LocationPlayersValueApi;
 import io.github.gonalez.zplayersync.data.value.MySQLConnectionFactory;
 import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.serializers.LocationSerializer;
+import io.github.gonalez.zplayersync.serializer.InventorySerializer;
+import io.github.gonalez.zplayersync.serializer.LocationSerializer;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /** The main class of the plugin. */
@@ -46,24 +55,19 @@ public class PlayerSyncPlugin extends JavaPlugin {
     saveConfig();
 
     try {
-      final DatabaseType databaseType;
-      try {
-        databaseType = DatabaseType.valueOf(fileConfiguration.getString("database.type"));
-      } catch (IllegalArgumentException exception) {
-        throw exception;
-      }
-
-      switch (databaseType) {
+      switch (DatabaseType.valueOf(fileConfiguration.getString("database.type"))) {
         case MYSQL:
-          pluginModule = new PlayerSyncPluginModule(
+          ConnectionFactory connectionFactory =
               new MySQLConnectionFactory(
                   getDataFolder().toPath().resolve("playersync.db"),
                   fileConfiguration.getString("database.url"),
                   fileConfiguration.getString("database.user"),
-                  fileConfiguration.getString("database.pass")),
-              new GsonBuilder()
-                  .registerTypeAdapter(Location.class, new LocationSerializer())
-                  .create(),
+                  fileConfiguration.getString("database.pass"));
+          try (Connection connection = connectionFactory.create()) {
+            getLogger().info("Connected to the MYSQL database successfully");
+          }
+          pluginModule = new PlayerSyncPluginModule(connectionFactory,
+              new Gson(),
               ImmutableList.copyOf(
                   fileConfiguration.getConfigurationSection("enabled_values").getKeys(false)
                       .stream()
@@ -72,22 +76,28 @@ public class PlayerSyncPlugin extends JavaPlugin {
           break;
       }
 
+      // built-in serializers
+      pluginModule.registerSerializer(Location.class, new LocationSerializer());
+      pluginModule.registerSerializer(Inventory.class, new InventorySerializer());
+
       ImmutableList.of(
           new HealthPlayersValueApi(),
           new FoodPlayersValueApi(),
-          new LocationPlayersValueApi())
+          new LocationPlayersValueApi(),
+          new InventoryPlayersValueApi(),
+          new LevelPlayersValueApi(),
+          new ExperiencePlayersValueApi())
           .forEach(valueApi ->
               pluginModule.initializePlayerValueApi(valueApi));
 
       pluginModule.init();
-
-      PluginManager pluginManager = getServer().getPluginManager();
 
       PlayerDataReadWriter playerDataReadWriter = pluginModule.getDataReadWriter();
       if (playerDataReadWriter == null) {
         String msg = "PlayerDataReadWriter not found, could not fully initialize the plugin.";
         getLogger().log(Level.WARNING, msg);
       } else {
+        PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerSyncListener(playerDataReadWriter), this);
       }
     } catch (Exception e) {

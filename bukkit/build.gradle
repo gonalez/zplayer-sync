@@ -26,4 +26,3 @@ shadowJar {
 
     relocate 'com.google.auto', 'libs.com.google.auto'
 }
-

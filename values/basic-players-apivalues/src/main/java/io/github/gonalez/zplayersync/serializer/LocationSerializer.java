@@ -1,0 +1,57 @@
+/*
+ * Copyright 2022 - Gaston Gonzalez (Gonalez). and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.gonalez.zplayersync.serializer;
+
+import com.google.common.base.Splitter;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+
+import java.util.List;
+
+/** Serializer & deserializer for bukkit locations. */
+public class LocationSerializer implements ObjectSerializer<Location> {
+
+  private static final char SPLIT_CH = ':';
+  private static final Splitter SPLITTER = Splitter.on(SPLIT_CH);
+
+  @Override
+  public String serialize(Location src) {
+    return new StringBuilder(src.getWorld().getName())
+        .append(SPLIT_CH)
+        .append(src.getX())
+        .append(SPLIT_CH)
+        .append(src.getY())
+        .append(SPLIT_CH)
+        .append(src.getZ())
+        .append(SPLIT_CH)
+        .append(src.getYaw())
+        .append(SPLIT_CH)
+        .append(src.getPitch())
+        .toString();
+  }
+
+  @Override
+  public Location deserialize(String data) {
+    List<String> splitJsonToList = SPLITTER.splitToList(data);
+    return new Location(
+        Bukkit.getWorld(splitJsonToList.get(0)),
+        Double.parseDouble(splitJsonToList.get(1)),
+        Double.parseDouble(splitJsonToList.get(2)),
+        Double.parseDouble(splitJsonToList.get(3)),
+        Float.parseFloat(splitJsonToList.get(4)),
+        Float.parseFloat(splitJsonToList.get(5)));
+  }
+}

@@ -13,16 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.serializer;
+package io.github.gonalez.zplayersync.data.value;
 
-import io.github.gonalez.zplayersync.ObjectSerializerException;
+import org.bukkit.entity.Player;
 
-/** Responsible for serializing and deserializing objects. */
-public interface ObjectSerializer<T> {
+/** Value for level experience of players. */
+public class ExperiencePlayersValueApi implements PlayersValueApi<Float> {
+  public static final String IDENTIFIER = "experience";
 
-  /** @return the serialized value as a {@code String}. */
-  String serialize(T value) throws ObjectSerializerException;
 
-  /** @return the deserialized value from the {@code String}. */
-  T deserialize(String data) throws ObjectSerializerException;
+  @Override
+  public Class<Float> type() {
+    return Float.class;
+  }
+
+  @Override
+  public String identifier() {
+    return IDENTIFIER;
+  }
+
+  @Override
+  public Float read(Player input) {
+    return input.getExp();
+  }
+
+  @Override
+  public void set(Player input, Float aFloat) {
+    input.setExp(aFloat);
+  }
 }

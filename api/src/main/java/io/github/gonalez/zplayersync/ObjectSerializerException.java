@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.serializer;
+package io.github.gonalez.zplayersync;
 
-import io.github.gonalez.zplayersync.ObjectSerializerException;
+/**
+ * Exception thrown when cannot serialize or deserialize an object via
+ * the {@link io.github.gonalez.zplayersync.serializer.ObjectSerializer}.
+ */
+public class ObjectSerializerException extends RuntimeException {
 
-/** Responsible for serializing and deserializing objects. */
-public interface ObjectSerializer<T> {
+  public ObjectSerializerException(String message) {
+    super(message);
+  }
 
-  /** @return the serialized value as a {@code String}. */
-  String serialize(T value) throws ObjectSerializerException;
+  public ObjectSerializerException(Throwable cause) {
+    super(cause);
+  }
 
-  /** @return the deserialized value from the {@code String}. */
-  T deserialize(String data) throws ObjectSerializerException;
+  public ObjectSerializerException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

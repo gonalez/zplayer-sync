@@ -22,6 +22,7 @@ import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 // TODO: javadoc
 public abstract class PlayerSyncModule {
 
+  /** Initializes the module. */
   public void init() throws Exception {}
 
   public PlayerDataReadWriter getDataReadWriter() {

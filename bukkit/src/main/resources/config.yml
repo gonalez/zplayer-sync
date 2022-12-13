@@ -12,3 +12,6 @@ enabled_values:
   health: true
   food: true
   location: true
+  inventory: true
+  level: true
+  experience: true
