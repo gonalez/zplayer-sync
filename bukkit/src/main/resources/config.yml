@@ -1,0 +1,14 @@
+# Database
+database:
+  # Available database types:
+  #   MYSQL
+  type: MYSQL
+  url: jdbc:mysql://localhost:3306/databaseName
+  user: username
+  pass: pass
+
+# What values should be shared?
+enabled_values:
+  health: true
+  food: true
+  location: true

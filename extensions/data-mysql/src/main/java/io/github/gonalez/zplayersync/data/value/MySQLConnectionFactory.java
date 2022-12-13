@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.github.gonalez.zplayersync.data.values;
+package io.github.gonalez.zplayersync.data.value;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,12 +22,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class SQLiteConnectionFactory implements ConnectionFactory {
-  private final String path;
+/** Implementation of connection factory for mysql connections. */
+public class MySQLConnectionFactory implements ConnectionFactory {
+  private final String path, url, username, password;
 
-  public SQLiteConnectionFactory(Path path) throws IOException {
+  public MySQLConnectionFactory(
+      Path path,
+      String url,
+      String username,
+      String password) throws IOException {
     try {
-      Class.forName("org.sqlite.JDBC");
+      Class.forName("com.mysql.jdbc.Driver");
     } catch (ClassNotFoundException classNotFoundException) {
       throw new IOException(classNotFoundException);
     }
@@ -37,10 +41,13 @@ public class SQLiteConnectionFactory implements ConnectionFactory {
       throw new IOException("Failed to create parent file for path: " + path);
     }
     this.path = path.toString();
+    this.url = url;
+    this.username = username;
+    this.password = password;
   }
 
   @Override
   public Connection create() throws SQLException {
-    return DriverManager.getConnection("jdbc:sqlite:" + path);
+    return DriverManager.getConnection(url, username, password);
   }
 }

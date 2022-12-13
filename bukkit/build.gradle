@@ -8,6 +8,9 @@ dependencies {
     implementation(project(':api'),
             // Extensions
             project(':extensions:data-mysql'),
+            // Values
+            project(':values:basic-players-apivalues'),
+            // Other
             libs['maven.com_google_auto_value_auto_value_annotations'])
 
     compileOnly(libs['maven.org_spigotmc_spigot_api'])

@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zplayersync;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.gonalez.zplayersync.data.values.ConnectionFactory;
-import io.github.gonalez.zplayersync.data.values.SQLPlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.values.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.values.PlayersValueApi;
-import io.github.gonalez.zplayersync.data.serializer.ObjectSerializer;
+import io.github.gonalez.zplayersync.data.value.ConnectionFactory;
+import io.github.gonalez.zplayersync.data.value.SQLPlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
+import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/** <internal> */
 public class PlayerSyncPluginModule extends PlayerSyncModule {
   private final Object lock = new Object();
 
@@ -45,17 +45,21 @@ public class PlayerSyncPluginModule extends PlayerSyncModule {
 
   private final Gson gson;
 
+  private final ImmutableList<String> excludedValueApis;
+
   public PlayerSyncPluginModule(
       ConnectionFactory connectionProvider,
-      @Nullable Gson gson) {
+      @Nullable Gson gson,
+      ImmutableList<String> excludedValueApis) {
     this.connectionProvider = connectionProvider;
     this.gson = gson;
+    this.excludedValueApis = excludedValueApis;
     valueApis = new ArrayList<>();
   }
 
   public PlayerSyncPluginModule(
       ConnectionFactory connectionProvider) {
-    this(connectionProvider, null);
+    this(connectionProvider, null, ImmutableList.of());
   }
 
   @Override
@@ -110,8 +114,10 @@ public class PlayerSyncPluginModule extends PlayerSyncModule {
 
   @Override
   public <T> void initializePlayerValueApi(PlayersValueApi<T> valueApi) {
-    synchronized (lock) {
-      valueApis.add(valueApi);
+    if (!excludedValueApis.contains(valueApi.identifier())) {
+      synchronized (lock) {
+        valueApis.add(valueApi);
+      }
     }
   }
 

@@ -13,30 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.data.values;
+package io.github.gonalez.zplayersync.data.value;
 
-import org.bukkit.entity.Player;
+import com.google.common.collect.ImmutableList;
 
-public class HealthPlayersValueApi implements PlayersValueApi<Double> {
-  public static final String IDENTIFIER = "health";
+import java.util.UUID;
 
-  @Override
-  public Class<Double> type() {
-    return Double.class;
-  }
-
-  @Override
-  public String identifier() {
-    return IDENTIFIER;
-  }
-
-  @Override
-  public Double read(Player input) {
-    return input.getHealth();
-  }
-
-  @Override
-  public void set(Player input, Double aDouble) {
-    input.setHealth(aDouble);
-  }
+/** Interface for reading and writing data of {@link PlayersValueApi}s. */
+public interface PlayerDataReadWriter {
+  ImmutableList<PlayersValueApi<?>> read(UUID playerUUID);
+  void write(UUID playerUUID);
 }

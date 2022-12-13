@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.github.gonalez.zplayersync.data.values;
+package io.github.gonalez.zplayersync.data.value;
 
 import org.bukkit.entity.Player;
-
-import javax.annotation.Nullable;
 
 /** A special value of a player that can be accessed and modified. */
 public interface PlayersValueApi<VALUE_TYPE> {

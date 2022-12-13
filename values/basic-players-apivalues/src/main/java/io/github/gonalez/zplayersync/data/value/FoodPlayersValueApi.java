@@ -13,15 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zplayersync.data.value;
 
-package io.github.gonalez.zplayersync.data.values;
+import org.bukkit.entity.Player;
 
-import com.google.common.collect.ImmutableList;
+/** Value for food level of players. */
+public class FoodPlayersValueApi implements PlayersValueApi<Integer> {
+  public static final String IDENTIFIER = "food";
 
-import java.util.UUID;
+  @Override
+  public Class<Integer> type() {
+    return Integer.class;
+  }
 
-/** Interface for reading and writing data of {@link PlayersValueApi}s. */
-public interface PlayerDataReadWriter {
-  ImmutableList<PlayersValueApi<?>> read(UUID playerUUID);
-  void write(UUID playerUUID);
+  @Override
+  public String identifier() {
+    return IDENTIFIER;
+  }
+
+  @Override
+  public Integer read(Player input) {
+    return input.getFoodLevel();
+  }
+
+  @Override
+  public void set(Player input, Integer integer) {
+    input.setFoodLevel(integer);
+  }
 }

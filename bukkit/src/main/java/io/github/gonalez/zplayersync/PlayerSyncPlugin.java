@@ -13,64 +13,85 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.zplayersync;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import io.github.gonalez.zplayersync.data.values.SQLiteConnectionFactory;
-import io.github.gonalez.zplayersync.data.values.PlayersValueApi;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import com.google.gson.GsonBuilder;
+import io.github.gonalez.zplayersync.data.value.FoodPlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.HealthPlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.LocationPlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.MySQLConnectionFactory;
+import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
+import io.github.gonalez.zplayersync.serializers.LocationSerializer;
+import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
-public class PlayerSyncPlugin extends JavaPlugin implements Listener {
+/** The main class of the plugin. */
+public class PlayerSyncPlugin extends JavaPlugin {
+
   @Nullable
   private PlayerSyncModule pluginModule;
 
   @Override
   public void onEnable() {
-    getServer().getPluginManager().registerEvents(this, this);
+    FileConfiguration fileConfiguration = getConfig();
+
+    getConfig().options().copyDefaults(true);
+    saveConfig();
 
     try {
-      pluginModule = new PlayerSyncPluginModule(
-          new SQLiteConnectionFactory(getDataFolder().toPath().resolve("test.db")),
-          new Gson());
-
+      final DatabaseType databaseType;
       try {
-        pluginModule.init();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+        databaseType = DatabaseType.valueOf(fileConfiguration.getString("database.type"));
+      } catch (IllegalArgumentException exception) {
+        throw exception;
       }
 
-      pluginModule.initializePlayerValueApi(new PlayersValueApi<Double>() {
-        @Override
-        public Class<Double> type() {
-          return double.class;
-        }
+      switch (databaseType) {
+        case MYSQL:
+          pluginModule = new PlayerSyncPluginModule(
+              new MySQLConnectionFactory(
+                  getDataFolder().toPath().resolve("playersync.db"),
+                  fileConfiguration.getString("database.url"),
+                  fileConfiguration.getString("database.user"),
+                  fileConfiguration.getString("database.pass")),
+              new GsonBuilder()
+                  .registerTypeAdapter(Location.class, new LocationSerializer())
+                  .create(),
+              ImmutableList.copyOf(
+                  fileConfiguration.getConfigurationSection("enabled_values").getKeys(false)
+                      .stream()
+                      .filter(s -> !fileConfiguration.getBoolean("enabled_values." + s))
+                      .collect(Collectors.toList())));
+          break;
+      }
 
-        @Override
-        public String identifier() {
-          return "health";
-        }
+      ImmutableList.of(
+          new HealthPlayersValueApi(),
+          new FoodPlayersValueApi(),
+          new LocationPlayersValueApi())
+          .forEach(valueApi ->
+              pluginModule.initializePlayerValueApi(valueApi));
 
-        @Override
-        public Double read(Player input) {
-          return input.getHealth();
-        }
+      pluginModule.init();
 
-        @Override
-        public void set(Player input, Double aDouble) {
-          input.setHealth(aDouble);
-        }
-      });
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      PluginManager pluginManager = getServer().getPluginManager();
+
+      PlayerDataReadWriter playerDataReadWriter = pluginModule.getDataReadWriter();
+      if (playerDataReadWriter == null) {
+        String msg = "PlayerDataReadWriter not found, could not fully initialize the plugin.";
+        getLogger().log(Level.WARNING, msg);
+      } else {
+        pluginManager.registerEvents(new PlayerSyncListener(playerDataReadWriter), this);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot initialize plugin", e);
     }
   }
 }

@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.github.gonalez.zplayersync.data.values;
+package io.github.gonalez.zplayersync.data.value;
 
 import com.google.common.collect.ImmutableList;
-import io.github.gonalez.zplayersync.data.serializer.ObjectSerializer;
+import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -26,8 +25,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.UUID;
 
+/** Base class for PlayerDataReadWriter which reads and writes via sql. */
 public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
   private final ConnectionFactory connectionProvider;
 
@@ -35,34 +36,34 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
     this.connectionProvider = connectionProvider;
   }
 
+  /** Finds the appropriate object serializer of the given class or {@code null} if not found. */
   @Nullable
   protected abstract <T> ObjectSerializer<T> findSerializerOfType(Class<T> type);
 
   /** List of all available {@link PlayersValueApi} to be used. */
   protected abstract ImmutableList<PlayersValueApi<?>> providePlayerValues();
 
+  /** @return the online-player matching the given uuid. */
   public Player getPlayer(UUID uuid) {
     return Bukkit.getPlayer(uuid);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public ImmutableList<PlayersValueApi<?>> read(UUID uuid) {
+  public synchronized ImmutableList<PlayersValueApi<?>> read(UUID uuid) {
     ImmutableList.Builder<PlayersValueApi<?>> apiBuilder = ImmutableList.builder();
     try (Connection connection = connectionProvider.create()) {
       for (PlayersValueApi valueApi : providePlayerValues()) {
-        PreparedStatement preparedStatement =
-            connection.prepareStatement(String.format(
-                "SELECT data FROM %s WHERE uuid = ?", valueApi.identifier()));
-        preparedStatement.setString(1, uuid.toString());
-        ResultSet rs = preparedStatement.executeQuery();
-        while (rs.next()) {
+        setupPlayerDataValueTables(connection, valueApi);
+
+        Optional<String> optionalS = findData(connection, valueApi, uuid);
+        if (optionalS.isPresent()) {
           ObjectSerializer<?> objectSerializer = findSerializerOfType(valueApi.type());
           if (objectSerializer == null) {
             continue;
           }
-
-          Object data = objectSerializer.deserialize(rs.getString(1));
-          PlayersValueApi<?> playersValueApi = new PlayersValueApi<Object>() {
+          Object data = objectSerializer.deserialize(optionalS.get());
+          apiBuilder.add(new PlayersValueApi<Object>() {
             @Override
             public Class<Object> type() {
               return (Class<Object>) valueApi.type();
@@ -81,6 +82,11 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
 
             @Override
             public void set(Player input, Object value) {
+              set(input);
+            }
+
+            @Override
+            public void set(Player input) {
               valueApi.set(input, data);
             }
 
@@ -88,8 +94,7 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
             public boolean isStandalone() {
               return true;
             }
-          };
-          apiBuilder.add(playersValueApi);
+          });
         }
       }
     } catch (SQLException e) {
@@ -98,41 +103,59 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
     return apiBuilder.build();
   }
 
+  private Optional<String> findData(Connection connection, PlayersValueApi<?> valueApi, UUID uuid)
+      throws SQLException {
+    PreparedStatement preparedStatement =
+        connection.prepareStatement(String.format(
+            "SELECT data FROM %s WHERE uuid = ?", valueApi.identifier()));
+    preparedStatement.setString(1, uuid.toString());
+    ResultSet rs = preparedStatement.executeQuery();
+    if (rs.next()) {
+      return Optional.of(rs.getString(1));
+    }
+    return Optional.empty();
+  }
+
   private void setupPlayerDataValueTables(
       Connection connection, PlayersValueApi<?> value) throws SQLException {
     connection
         .createStatement()
         .executeUpdate(String.format(
             "CREATE TABLE IF NOT EXISTS %s "
-                + "(uuid BLOB PRIMARY KEY NOT NULL, "
-                + "data BLOB NOT NULL) "
-                + "WITHOUT ROWID", value.identifier()));
+                + "(uuid VARCHAR(36) PRIMARY KEY NOT NULL, "
+                + "data BLOB NOT NULL)", value.identifier()));
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public void write(UUID uuid) {
+  public synchronized void write(UUID uuid) {
     Player player = getPlayer(uuid);
     if (player == null) {
       return;
     }
     try (Connection connection = connectionProvider.create()) {
-      for (PlayersValueApi<?> value : providePlayerValues()) {
-        setupPlayerDataValueTables(connection, value);
+      for (PlayersValueApi<?> valueApi : providePlayerValues()) {
+        setupPlayerDataValueTables(connection, valueApi);
 
-        ObjectSerializer serializer = findSerializerOfType(value.type());
+        ObjectSerializer serializer = findSerializerOfType(valueApi.type());
         if (serializer == null) {
           continue;
         }
 
-
-        String serializedValue = serializer.serialize(value.read(player));
+        String serializedValue = serializer.serialize(valueApi.read(player));
         if (serializedValue == null) {
          continue;
         }
 
+        Optional<String> find = findData(connection, valueApi, uuid);
+        String queryType = "INSERT";
+        if (find.isPresent()) {
+          queryType = "REPLACE";
+        }
+
         PreparedStatement preparedStatement =
             connection.prepareStatement(String.format(
-                "INSERT OR REPLACE into %s (uuid, data) VALUES (?, ?)", value.identifier()));
+                "%s into %s (uuid, data) VALUES (?, ?)", queryType, valueApi.identifier()));
         preparedStatement.setString(1, uuid.toString());
         preparedStatement.setString(2, serializedValue);
         preparedStatement.executeUpdate();

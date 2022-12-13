@@ -13,23 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync;
+package io.github.gonalez.zplayersync.serializer;
 
-import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
-import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
+/** Responsible for serializing and deserializing objects. */
+public interface ObjectSerializer<T> {
 
-// TODO: javadoc
-public abstract class PlayerSyncModule {
+  /** @return the serialized value as a {@code String}. */
+  String serialize(T value);
 
-  public void init() throws Exception {}
-
-  public PlayerDataReadWriter getDataReadWriter() {
-    return null;
-  }
-
-  /** Sets up the given value api into this module. */
-  public <T> void initializePlayerValueApi(PlayersValueApi<T> valueApi) {}
-
-  public <T> void registerSerializer(Class<T> type, ObjectSerializer<T> serializer) {}
+  /** @return the deserialized value from the {@code String}. */
+  T deserialize(String data);
 }

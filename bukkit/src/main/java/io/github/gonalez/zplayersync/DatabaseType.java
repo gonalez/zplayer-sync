@@ -13,15 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zplayersync;
 
-package io.github.gonalez.zplayersync.data.serializer;
-
-/** Responsible for serializing and deserializing objects. */
-public interface ObjectSerializer<T> {
-
-  /** @return the serialized value as a {@code String}. */
-  String serialize(T value);
-
-  /** @return the deserialized value from the {@code String}. */
-  T deserialize(String data);
+/** Supported databases for zplayer-sync. */
+public enum DatabaseType {
+  MYSQL,
 }

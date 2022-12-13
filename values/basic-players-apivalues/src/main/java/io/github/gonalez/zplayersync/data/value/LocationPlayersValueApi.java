@@ -13,18 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.zplayersync.data.value;
 
-package io.github.gonalez.zplayersync.data.values;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+/** Value for location of players. */
+public class LocationPlayersValueApi implements PlayersValueApi<Location> {
+  public static final String IDENTIFIER = "location";
 
-/** Factory to create sql connections. */
-public interface ConnectionFactory {
+  @Override
+  public Class<Location> type() {
+    return Location.class;
+  }
 
-  /**
-   * Creates and establish a new sql connection, throws an
-   * {@link SQLException} if failed to establish connection.
-   */
-  Connection create() throws SQLException;
+  @Override
+  public String identifier() {
+    return IDENTIFIER;
+  }
+
+  @Override
+  public Location read(Player input) {
+    return input.getLocation();
+  }
+
+  @Override
+  public void set(Player input, Location location) {
+    input.teleport(location);
+  }
 }

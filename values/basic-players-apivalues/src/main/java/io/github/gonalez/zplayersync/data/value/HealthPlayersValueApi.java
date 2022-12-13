@@ -13,23 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync;
+package io.github.gonalez.zplayersync.data.value;
 
-import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
-import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
+import org.bukkit.entity.Player;
 
-// TODO: javadoc
-public abstract class PlayerSyncModule {
+/** Value for health level of players. */
+public class HealthPlayersValueApi implements PlayersValueApi<Double> {
+  public static final String IDENTIFIER = "health";
 
-  public void init() throws Exception {}
-
-  public PlayerDataReadWriter getDataReadWriter() {
-    return null;
+  @Override
+  public Class<Double> type() {
+    return Double.class;
   }
 
-  /** Sets up the given value api into this module. */
-  public <T> void initializePlayerValueApi(PlayersValueApi<T> valueApi) {}
+  @Override
+  public String identifier() {
+    return IDENTIFIER;
+  }
 
-  public <T> void registerSerializer(Class<T> type, ObjectSerializer<T> serializer) {}
+  @Override
+  public Double read(Player input) {
+    return input.getHealth();
+  }
+
+  @Override
+  public void set(Player input, Double aDouble) {
+    input.setHealth(aDouble);
+  }
 }
