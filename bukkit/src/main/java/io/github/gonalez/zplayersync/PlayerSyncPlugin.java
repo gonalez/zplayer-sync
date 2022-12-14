@@ -27,7 +27,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
-import java.sql.Connection;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
