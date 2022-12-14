@@ -17,15 +17,7 @@ package io.github.gonalez.zplayersync;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import io.github.gonalez.zplayersync.data.value.ConnectionFactory;
-import io.github.gonalez.zplayersync.data.value.ExperiencePlayersValueApi;
-import io.github.gonalez.zplayersync.data.value.FoodPlayersValueApi;
-import io.github.gonalez.zplayersync.data.value.HealthPlayersValueApi;
-import io.github.gonalez.zplayersync.data.value.InventoryPlayersValueApi;
-import io.github.gonalez.zplayersync.data.value.LevelPlayersValueApi;
-import io.github.gonalez.zplayersync.data.value.LocationPlayersValueApi;
-import io.github.gonalez.zplayersync.data.value.MySQLConnectionFactory;
-import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.value.*;
 import io.github.gonalez.zplayersync.serializer.InventorySerializer;
 import io.github.gonalez.zplayersync.serializer.LocationSerializer;
 import org.bukkit.Location;
@@ -61,9 +53,6 @@ public class PlayerSyncPlugin extends JavaPlugin {
                   fileConfiguration.getString("database.url"),
                   fileConfiguration.getString("database.user"),
                   fileConfiguration.getString("database.pass"));
-          try (Connection connection = connectionFactory.create()) {
-            getLogger().info("Connected to the MYSQL database successfully");
-          }
           pluginModule = new PlayerSyncPluginModule(connectionFactory,
               new Gson(),
               ImmutableList.copyOf(
@@ -95,6 +84,8 @@ public class PlayerSyncPlugin extends JavaPlugin {
         String msg = "PlayerDataReadWriter not found, could not fully initialize the plugin.";
         getLogger().log(Level.WARNING, msg);
       } else {
+        playerDataReadWriter.open();
+
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerSyncListener(playerDataReadWriter), this);
       }
