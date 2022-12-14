@@ -93,6 +93,16 @@ public class PlayerSyncPlugin extends JavaPlugin {
     }
   }
 
+  @Override
+  public void onDisable() {
+    if (pluginModule != null) {
+      PlayerDataReadWriter dataReadWriter = pluginModule.getDataReadWriter();
+      if (dataReadWriter != null) {
+        dataReadWriter.close();
+      }
+    }
+  }
+
   @Nullable
   public PlayerSyncModule getPluginModule() {
     return pluginModule;
