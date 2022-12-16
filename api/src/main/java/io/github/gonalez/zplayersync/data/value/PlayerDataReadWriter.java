@@ -19,11 +19,11 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.UUID;
 
-/** Interface for reading and writing data of {@link PlayersValueApi}s. */
+/** Interface for reading and writing data of {@link PlayerDataApi}s. */
 public interface PlayerDataReadWriter {
   void open();
   void close();
 
-  ImmutableList<PlayersValueApi<?>> read(UUID playerUUID);
+  ImmutableList<PlayerDataApi<?>> read(UUID playerUUID);
   void write(UUID playerUUID);
 }

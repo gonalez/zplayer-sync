@@ -17,13 +17,14 @@ package io.github.gonalez.zplayersync.data.value;
 
 import org.bukkit.entity.Player;
 
-/** Value for food level of players. */
-public class FoodPlayersValueApi implements PlayersValueApi<Integer> {
-  public static final String IDENTIFIER = "food";
+/** Value for level experience of players. */
+public class ExperiencePlayersValueApi implements PlayerDataApi<Float> {
+  public static final String IDENTIFIER = "experience";
+
 
   @Override
-  public Class<Integer> type() {
-    return Integer.class;
+  public Class<Float> type() {
+    return Float.class;
   }
 
   @Override
@@ -32,12 +33,12 @@ public class FoodPlayersValueApi implements PlayersValueApi<Integer> {
   }
 
   @Override
-  public Integer read(Player input) {
-    return input.getFoodLevel();
+  public Float read(Player input) {
+    return input.getExp();
   }
 
   @Override
-  public void set(Player input, Integer integer) {
-    input.setFoodLevel(integer);
+  public void set(Player input, Float aFloat) {
+    input.setExp(aFloat);
   }
 }

@@ -9,7 +9,7 @@ dependencies {
             // Extensions
             project(':extensions:data-mysql'),
             // Values
-            project(':values:basic-players-apivalues'),
+            project(':extensions:data-value-player-basic'),
             // Other
             libs['maven.com_google_auto_value_auto_value_annotations'])
 

@@ -20,37 +20,49 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import io.github.gonalez.zplayersync.data.event.PlayerDataReadEvent;
 import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
+
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 
-import java.util.UUID;
+import java.util.ArrayList;
 
 /** Listener to {@link PlayerDataReadWriter} write & read the values of players when entering and leaving the server. */
-public class PlayerSyncListener implements Listener {
+class PlayerSyncListener implements Listener {
   private final PlayerDataReadWriter dataReadWriter;
+  private final Plugin plugin;
 
-  public PlayerSyncListener(PlayerDataReadWriter dataReadWriter) {
+  public PlayerSyncListener(
+      PlayerDataReadWriter dataReadWriter,
+      Plugin plugin) {
     this.dataReadWriter = checkNotNull(dataReadWriter);
+    this.plugin = checkNotNull(plugin);
   }
 
   @EventHandler
   public void onJoin(PlayerJoinEvent joinEvent) {
-    UUID playerUUID = joinEvent.getPlayer().getUniqueId();
-    ImmutableList<PlayersValueApi<?>> valueApis =
-        dataReadWriter.read(playerUUID);
+    // Wait a bit to get the latest data from mysql, even though we are using row locking when a player
+    // goes from one server to another it can be so fast that mysql doesn't have time to lock the rows
+    // when in multiple client. // TODO (gonalez): Find a better way for this...
+    plugin.getServer().getScheduler()
+        .runTaskLater(plugin, () -> {
+          ImmutableList<PlayerDataApi<?>> playersValueApis =
+              dataReadWriter.read(joinEvent.getPlayer().getUniqueId());
 
-    PlayerDataReadEvent dataWriteEvent = new PlayerDataReadEvent(playerUUID, valueApis);
-    Bukkit.getServer().getPluginManager().callEvent(dataWriteEvent);
+          PlayerDataReadEvent dataWriteEvent =
+              new PlayerDataReadEvent(joinEvent.getPlayer().getUniqueId(), new ArrayList<>(playersValueApis));
+          Bukkit.getServer().getPluginManager().callEvent(dataWriteEvent);
 
-    if (!dataWriteEvent.isCancelled()) {
-      valueApis.stream()
-          .filter(PlayersValueApi::isStandalone)
-          .forEach(playersValueApi -> playersValueApi.set(joinEvent.getPlayer()));
-    }
+          if (!dataWriteEvent.isCancelled()) {
+            dataWriteEvent.getValueApis().stream()
+                .filter(PlayerDataApi::isStandalone)
+                .forEach(valueApi -> valueApi.set(joinEvent.getPlayer()));
+          }
+          }, 2);
   }
 
   @EventHandler

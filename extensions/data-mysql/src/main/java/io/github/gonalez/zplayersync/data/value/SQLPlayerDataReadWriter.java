@@ -26,16 +26,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Optional;
 import java.util.UUID;
 
 /** Base class for PlayerDataReadWriter which reads and writes via sql. */
 public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
+  private static final String SELECT_DATA_SQL = "SELECT data FROM %s WHERE uuid = ? FOR UPDATE";
+  private static final String UPDATE_DATA_SQL = "%s INTO %s (uuid, data) VALUES (?, ?)";
+
   private final ConnectionFactory connectionProvider;
 
   private volatile boolean opened;
 
-  private Connection connection;
+  protected Connection connection;
 
   public SQLPlayerDataReadWriter(ConnectionFactory connectionProvider) {
     this.connectionProvider = connectionProvider;
@@ -52,6 +54,9 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
 
     try {
       connection = connectionProvider.create();
+      connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+      connection.setAutoCommit(false);
     } catch (SQLException sqlException) {
       throw new RuntimeException(sqlException);
     }
@@ -77,8 +82,8 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
   @Nullable
   protected abstract <T> ObjectSerializer<T> findSerializerOfType(Class<T> type);
 
-  /** List of all available {@link PlayersValueApi} to be used. */
-  protected abstract ImmutableList<PlayersValueApi<?>> providePlayerValues();
+  /** List of all available {@link PlayerDataApi} to be used. */
+  protected abstract ImmutableList<PlayerDataApi<?>> providePlayerValues();
 
   /** @return the online-player matching the given uuid. */
   public Player getPlayer(UUID uuid) {
@@ -87,82 +92,65 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public synchronized ImmutableList<PlayersValueApi<?>> read(UUID uuid) {
+  public synchronized ImmutableList<PlayerDataApi<?>> read(UUID uuid) {
     open();
 
-    ImmutableList.Builder<PlayersValueApi<?>> apiBuilder = ImmutableList.builder();
+    ImmutableList.Builder<PlayerDataApi<?>> dataApiBuilder = ImmutableList.builder();
     try {
-      for (PlayersValueApi valueApi : providePlayerValues()) {
-        createPlayersValueTables(valueApi);
+      for (PlayerDataApi dataApi : providePlayerValues()) {
+        // Create tables
+        createPlayersValueTable(dataApi);
 
-        Optional<String> optionalS = findData(valueApi, uuid);
-        if (optionalS.isPresent()) {
-          ObjectSerializer<?> objectSerializer = findSerializerOfType(valueApi.type());
-          if (objectSerializer == null) {
-            continue;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+            String.format(SELECT_DATA_SQL, dataApi.identifier()))) {
+          preparedStatement.setString(1, uuid.toString());
+          try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            if (resultSet.next()) {
+              ObjectSerializer<?> objectSerializer = findSerializerOfType(dataApi.type());
+              if (objectSerializer != null) {
+                Object data = objectSerializer.deserialize(resultSet.getString(1));
+                dataApiBuilder.add(new PlayerDataApi<Object>() {
+                  @Override
+                  public Class<Object> type() {
+                    return (Class<Object>) dataApi.type();
+                  }
+
+                  @Override
+                  public String identifier() {
+                    return dataApi.identifier();
+                  }
+
+                  @Nullable
+                  @Override
+                  public Object read(@Nullable Player input) {
+                    return data;
+                  }
+
+                  @Override
+                  public void set(Player input, Object value) {
+                    set(input);
+                  }
+
+                  @Override
+                  public void set(Player input) {
+                    dataApi.set(input, data);
+                  }
+
+                  @Override
+                  public boolean isStandalone() {
+                    return true;
+                  }
+                });
+              }
+            }
           }
-          Object data = objectSerializer.deserialize(optionalS.get());
-          apiBuilder.add(new PlayersValueApi<Object>() {
-            @Override
-            public Class<Object> type() {
-              return (Class<Object>) valueApi.type();
-            }
-
-            @Override
-            public String identifier() {
-              return valueApi.identifier();
-            }
-
-            @Nullable
-            @Override
-            public Object read(@Nullable Player input) {
-              return data;
-            }
-
-            @Override
-            public void set(Player input, Object value) {
-              set(input);
-            }
-
-            @Override
-            public void set(Player input) {
-              valueApi.set(input, data);
-            }
-
-            @Override
-            public boolean isStandalone() {
-              return true;
-            }
-          });
         }
       }
+      connection.commit();
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    return apiBuilder.build();
-  }
-
-  private Optional<String> findData(PlayersValueApi<?> valueApi, UUID uuid)
-      throws SQLException {
-    String sql = String.format("SELECT data FROM %s WHERE uuid = ?", valueApi.identifier());
-    try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-      preparedStatement.setString(1, uuid.toString());
-      try (ResultSet rs = preparedStatement.executeQuery()) {
-        if (rs.next()) {
-          return Optional.of(rs.getString(1));
-        }
-      }
-    }
-    return Optional.empty();
-  }
-
-  private void createPlayersValueTables(PlayersValueApi<?> value) throws SQLException {
-    try (Statement statement = connection.createStatement()) {
-      statement.executeUpdate(String.format(
-          "CREATE TABLE IF NOT EXISTS %s "
-              + "(uuid VARCHAR(36) PRIMARY KEY NOT NULL, "
-              + "data BLOB NOT NULL)", value.identifier()));
-    }
+    return dataApiBuilder.build();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -170,41 +158,56 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
   public synchronized void write(UUID uuid) {
     open();
 
+    // Check the player for the given uuid. If no player is connected we can
+    // skip writing since we need the player to get the appropriate values.
     Player player = getPlayer(uuid);
     if (player == null) {
       return;
     }
 
     try {
-      for (PlayersValueApi<?> valueApi : providePlayerValues()) {
-        createPlayersValueTables(valueApi);
+      connection.setAutoCommit(false);
+      for (PlayerDataApi<?> dataApi : providePlayerValues()) {
+        // Create tables
+        createPlayersValueTable(dataApi);
 
-        ObjectSerializer serializer = findSerializerOfType(valueApi.type());
-        if (serializer == null) {
-          continue;
-        }
-
-        String serializedValue = serializer.serialize(valueApi.read(player));
-        if (serializedValue == null) {
-         continue;
-        }
-
-        Optional<String> find = findData(valueApi, uuid);
-        String queryType = "INSERT";
-        if (find.isPresent()) {
-          queryType = "REPLACE";
-        }
-
-        String sql = String.format("%s into %s (uuid, data) VALUES (?, ?)",
-            queryType, valueApi.identifier());
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-          preparedStatement.setString(1, uuid.toString());
-          preparedStatement.setString(2, serializedValue);
-          preparedStatement.executeUpdate();
+        ObjectSerializer serializer = findSerializerOfType(dataApi.type());
+        if (serializer != null) {
+          // Serialize the value from the player into a string
+          String serializedValue = serializer.serialize(dataApi.read(player));
+          if (serializedValue == null) {
+            // Skip this value ( no serializer )
+            continue;
+          }
+          try (PreparedStatement preparedStatement = connection.prepareStatement(
+              String.format(SELECT_DATA_SQL, dataApi.identifier()))) {
+            preparedStatement.setString(1, uuid.toString());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+              try (PreparedStatement insertStatement = connection.prepareStatement(
+                  String.format(UPDATE_DATA_SQL,
+                      resultSet.next() ? "REPLACE" : "INSERT",
+                      dataApi.identifier()))) {
+                insertStatement.setString(1, uuid.toString());
+                insertStatement.setString(2, serializedValue);
+                insertStatement.executeUpdate();
+              }
+            }
+          }
         }
       }
+      connection.commit();
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private void createPlayersValueTable(PlayerDataApi<?> value) throws SQLException {
+    String createTableSql =
+        "CREATE TABLE IF NOT EXISTS " + value.identifier() + " "
+            + "(uuid VARCHAR(36) PRIMARY KEY NOT NULL, "
+            + "data BLOB NOT NULL)";
+    try (Statement statement = connection.createStatement()) {
+      statement.execute(createTableSql);
     }
   }
 }

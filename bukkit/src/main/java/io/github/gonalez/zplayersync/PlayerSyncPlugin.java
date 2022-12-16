@@ -86,7 +86,8 @@ public class PlayerSyncPlugin extends JavaPlugin {
         playerDataReadWriter.open();
 
         PluginManager pluginManager = getServer().getPluginManager();
-        pluginManager.registerEvents(new PlayerSyncListener(playerDataReadWriter), this);
+        pluginManager.registerEvents(
+            new PlayerSyncListener(playerDataReadWriter, this), this);
       }
     } catch (Exception e) {
       throw new RuntimeException("Cannot initialize plugin", e);

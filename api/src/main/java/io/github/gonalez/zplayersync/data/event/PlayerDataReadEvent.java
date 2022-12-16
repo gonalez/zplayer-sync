@@ -15,7 +15,7 @@
  */
 package io.github.gonalez.zplayersync.data.event;
 
-import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -28,13 +28,13 @@ public class PlayerDataReadEvent extends Event implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
 
   private final UUID playerUUID;
-  private final List<PlayersValueApi<?>> valueApis;
+  private final List<PlayerDataApi<?>> valueApis;
 
   private boolean cancelled = false;
 
   public PlayerDataReadEvent(
       UUID playerUUID,
-      List<PlayersValueApi<?>> valueApis) {
+      List<PlayerDataApi<?>> valueApis) {
     this.playerUUID = playerUUID;
     this.valueApis = valueApis;
   }
@@ -43,7 +43,7 @@ public class PlayerDataReadEvent extends Event implements Cancellable {
     return playerUUID;
   }
 
-  public List<PlayersValueApi<?>> getValueApis() {
+  public List<PlayerDataApi<?>> getValueApis() {
     return valueApis;
   }
 

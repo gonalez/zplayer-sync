@@ -19,9 +19,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.gonalez.zplayersync.data.value.ConnectionFactory;
-import io.github.gonalez.zplayersync.data.value.SQLPlayerDataReadWriter;
 import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
+import io.github.gonalez.zplayersync.data.value.SQLPlayerDataReadWriter;
 import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ public class PlayerSyncPluginModule extends PlayerSyncModule {
 
   private final ConnectionFactory connectionProvider;
 
-  private final ArrayList<PlayersValueApi<?>> valueApis;
+  private final ArrayList<PlayerDataApi<?>> valueApis;
 
   private final Gson gson;
 
@@ -86,7 +86,7 @@ public class PlayerSyncPluginModule extends PlayerSyncModule {
       }
 
       @Override
-      protected ImmutableList<PlayersValueApi<?>> providePlayerValues() {
+      protected ImmutableList<PlayerDataApi<?>> providePlayerValues() {
         synchronized (lock) {
           return ImmutableList.copyOf(valueApis);
         }
@@ -113,7 +113,7 @@ public class PlayerSyncPluginModule extends PlayerSyncModule {
   }
 
   @Override
-  public <T> void initializePlayerValueApi(PlayersValueApi<T> valueApi) {
+  public <T> void initializePlayerValueApi(PlayerDataApi<T> valueApi) {
     if (!excludedValueApis.contains(valueApi.identifier())) {
       synchronized (lock) {
         valueApis.add(valueApi);

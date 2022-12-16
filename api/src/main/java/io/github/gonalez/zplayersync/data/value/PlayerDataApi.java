@@ -18,7 +18,7 @@ package io.github.gonalez.zplayersync.data.value;
 import org.bukkit.entity.Player;
 
 /** A special value of a player that can be accessed and modified. */
-public interface PlayersValueApi<VALUE_TYPE> {
+public interface PlayerDataApi<VALUE_TYPE> {
   Class<VALUE_TYPE> type();
 
   /** @return the unique identifier of the value. */

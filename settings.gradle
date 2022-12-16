@@ -7,5 +7,6 @@ include 'bukkit'
 include ':extensions:data-mysql'
 
 // Built-in PlayersValueApis
-include ':values:basic-players-apivalues'
+include ':extensions:data-mysql'
+include ':extensions:data-value-player-basic'
 

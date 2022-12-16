@@ -16,15 +16,14 @@
 package io.github.gonalez.zplayersync.data.value;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
-/** Value for inventory of players. */
-public class InventoryPlayersValueApi implements PlayersValueApi<Inventory> {
-  public static final String IDENTIFIER = "inventory";
+/** Value for food level of players. */
+public class FoodPlayersValueApi implements PlayerDataApi<Integer> {
+  public static final String IDENTIFIER = "food";
 
   @Override
-  public Class<Inventory> type() {
-    return Inventory.class;
+  public Class<Integer> type() {
+    return Integer.class;
   }
 
   @Override
@@ -33,12 +32,12 @@ public class InventoryPlayersValueApi implements PlayersValueApi<Inventory> {
   }
 
   @Override
-  public Inventory read(Player input) {
-    return input.getInventory();
+  public Integer read(Player input) {
+    return input.getFoodLevel();
   }
 
   @Override
-  public void set(Player input, Inventory inventory) {
-    input.getInventory().setContents(inventory.getContents());
+  public void set(Player input, Integer integer) {
+    input.setFoodLevel(integer);
   }
 }

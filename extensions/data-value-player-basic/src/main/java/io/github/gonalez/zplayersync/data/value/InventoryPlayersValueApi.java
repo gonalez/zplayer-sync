@@ -15,16 +15,16 @@
  */
 package io.github.gonalez.zplayersync.data.value;
 
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
-/** Value for location of players. */
-public class LocationPlayersValueApi implements PlayersValueApi<Location> {
-  public static final String IDENTIFIER = "location";
+/** Value for inventory of players. */
+public class InventoryPlayersValueApi implements PlayerDataApi<Inventory> {
+  public static final String IDENTIFIER = "inventory";
 
   @Override
-  public Class<Location> type() {
-    return Location.class;
+  public Class<Inventory> type() {
+    return Inventory.class;
   }
 
   @Override
@@ -33,12 +33,12 @@ public class LocationPlayersValueApi implements PlayersValueApi<Location> {
   }
 
   @Override
-  public Location read(Player input) {
-    return input.getLocation();
+  public Inventory read(Player input) {
+    return input.getInventory();
   }
 
   @Override
-  public void set(Player input, Location location) {
-    input.teleport(location);
+  public void set(Player input, Inventory inventory) {
+    input.getInventory().setContents(inventory.getContents());
   }
 }

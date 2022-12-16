@@ -16,7 +16,7 @@
 package io.github.gonalez.zplayersync;
 
 import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayersValueApi;
+import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
 import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 
 // TODO: javadoc
@@ -30,7 +30,7 @@ public abstract class PlayerSyncModule {
   }
 
   /** Sets up the given value api into this module. */
-  public <T> void initializePlayerValueApi(PlayersValueApi<T> valueApi) {}
+  public <T> void initializePlayerValueApi(PlayerDataApi<T> valueApi) {}
 
   public <T> void registerSerializer(Class<T> type, ObjectSerializer<T> serializer) {}
 }
