@@ -48,7 +48,6 @@ public class PlayerSyncPlugin extends JavaPlugin {
         case MYSQL:
           ConnectionFactory connectionFactory =
               new MySQLConnectionFactory(
-                  getDataFolder().toPath().resolve("playersync.db"),
                   fileConfiguration.getString("database.url"),
                   fileConfiguration.getString("database.user"),
                   fileConfiguration.getString("database.pass"));

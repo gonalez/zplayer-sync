@@ -46,8 +46,8 @@ class PlayerSyncListener implements Listener {
   @EventHandler
   public void onJoin(PlayerJoinEvent joinEvent) {
     // Wait a bit to get the latest data from mysql, even though we are using row locking when a player
-    // goes from one server to another it can be so fast that mysql doesn't have time to lock the rows
-    // when in multiple client. // TODO (gonalez): Find a better way for this...
+    // goes from one server to another it can be so fast that mysql doesn't have time to acquire the
+    // lock of rows when in multiple client. // TODO (gonalez): Find a better way for this...
     plugin.getServer().getScheduler()
         .runTaskLater(plugin, () -> {
           ImmutableList<PlayerDataApi<?>> playersValueApis =

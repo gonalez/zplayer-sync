@@ -144,9 +144,9 @@ public abstract class SQLPlayerDataReadWriter implements PlayerDataReadWriter {
               }
             }
           }
+          connection.commit();
         }
       }
-      connection.commit();
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }

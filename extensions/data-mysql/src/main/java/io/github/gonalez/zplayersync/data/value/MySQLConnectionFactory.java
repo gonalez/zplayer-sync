@@ -15,9 +15,7 @@
  */
 package io.github.gonalez.zplayersync.data.value;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,19 +24,11 @@ import java.sql.SQLException;
 public class MySQLConnectionFactory implements ConnectionFactory {
   private final String url, username, password;
 
-  public MySQLConnectionFactory(
-      Path path,
-      String url,
-      String username,
-      String password) throws IOException {
+  public MySQLConnectionFactory(String url, String username, String password) throws IOException {
     try {
       Class.forName("com.mysql.jdbc.Driver");
     } catch (ClassNotFoundException classNotFoundException) {
       throw new IOException(classNotFoundException);
-    }
-    File parentFile = path.getParent().toFile();
-    if (!parentFile.exists() && !parentFile.mkdirs()) {
-      throw new IOException("Failed to create parent file for path: " + path);
     }
     this.url = url;
     this.username = username;
