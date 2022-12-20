@@ -8,5 +8,5 @@ include ':extensions:data-mysql'
 
 // Built-in PlayersValueApis
 include ':extensions:data-mysql'
-include ':extensions:data-value-player-basic'
+include ':extensions:data-value-player'
 

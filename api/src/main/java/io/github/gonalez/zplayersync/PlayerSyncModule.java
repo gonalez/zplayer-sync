@@ -15,8 +15,8 @@
  */
 package io.github.gonalez.zplayersync;
 
-import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
+import io.github.gonalez.zplayersync.data.PlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
 import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 
 // TODO: javadoc

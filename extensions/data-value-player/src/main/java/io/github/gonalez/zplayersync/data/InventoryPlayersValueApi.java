@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.data.value;
+package io.github.gonalez.zplayersync.data;
 
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
-/** Value for level experience of players. */
-public class ExperiencePlayersValueApi implements PlayerDataApi<Float> {
-  public static final String IDENTIFIER = "experience";
-
+/** Value for inventory of players. */
+public class InventoryPlayersValueApi implements PlayerDataApi<Inventory> {
+  public static final String IDENTIFIER = "inventory";
 
   @Override
-  public Class<Float> type() {
-    return Float.class;
+  public Class<Inventory> type() {
+    return Inventory.class;
   }
 
   @Override
@@ -33,12 +34,12 @@ public class ExperiencePlayersValueApi implements PlayerDataApi<Float> {
   }
 
   @Override
-  public Float read(Player input) {
-    return input.getExp();
+  public Inventory read(Player input) {
+    return input.getInventory();
   }
 
   @Override
-  public void set(Player input, Float aFloat) {
-    input.setExp(aFloat);
+  public void set(Player input, Inventory inventory) {
+    input.getInventory().setContents(inventory.getContents());
   }
 }

@@ -19,8 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import io.github.gonalez.zplayersync.data.event.PlayerDataReadEvent;
-import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
+import io.github.gonalez.zplayersync.data.PlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;

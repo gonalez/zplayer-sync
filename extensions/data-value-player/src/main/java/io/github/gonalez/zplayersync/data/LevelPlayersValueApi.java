@@ -13,17 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.data.value;
+package io.github.gonalez.zplayersync.data;
 
-import com.google.common.collect.ImmutableList;
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
+import org.bukkit.entity.Player;
 
-import java.util.UUID;
+/** Value for level of players. */
+public class LevelPlayersValueApi implements PlayerDataApi<Integer> {
+  public static final String IDENTIFIER = "level";
 
-/** Interface for reading and writing data of {@link PlayerDataApi}s. */
-public interface PlayerDataReadWriter {
-  void open();
-  void close();
+  @Override
+  public Class<Integer> type() {
+    return Integer.class;
+  }
 
-  ImmutableList<PlayerDataApi<?>> read(UUID playerUUID);
-  void write(UUID playerUUID);
+  @Override
+  public String identifier() {
+    return IDENTIFIER;
+  }
+
+  @Override
+  public Integer read(Player input) {
+    return input.getLevel();
+  }
+
+  @Override
+  public void set(Player input, Integer integer) {
+    input.setLevel(integer);
+  }
 }

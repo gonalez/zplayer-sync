@@ -5,9 +5,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs['maven.com_google_auto_value_auto_value_annotations'],
-            libs['maven.org_spigotmc_spigot_api'])
-    annotationProcessor(libs['maven.com_google_auto_value_auto_value'])
+    implementation(libs['maven.org_spigotmc_spigot_api'])
 }
 
 shadowJar {

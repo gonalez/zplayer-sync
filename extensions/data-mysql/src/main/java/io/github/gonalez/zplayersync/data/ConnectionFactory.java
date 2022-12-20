@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.data.value;
+package io.github.gonalez.zplayersync.data;
 
-import org.bukkit.entity.Player;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-/** Value for food level of players. */
-public class FoodPlayersValueApi implements PlayerDataApi<Integer> {
-  public static final String IDENTIFIER = "food";
+/** Factory to create sql connections. */
+public interface ConnectionFactory {
 
-  @Override
-  public Class<Integer> type() {
-    return Integer.class;
-  }
-
-  @Override
-  public String identifier() {
-    return IDENTIFIER;
-  }
-
-  @Override
-  public Integer read(Player input) {
-    return input.getFoodLevel();
-  }
-
-  @Override
-  public void set(Player input, Integer integer) {
-    input.setFoodLevel(integer);
-  }
+  /**
+   * Creates and establish a new sql connection, throws an
+   * {@link SQLException} if failed to establish connection.
+   */
+  Connection create() throws SQLException;
 }

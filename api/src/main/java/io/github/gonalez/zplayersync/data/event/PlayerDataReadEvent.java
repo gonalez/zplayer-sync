@@ -15,7 +15,8 @@
  */
 package io.github.gonalez.zplayersync.data.event;
 
-import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
+import io.github.gonalez.zplayersync.data.PlayerDataReadWriter;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -23,7 +24,7 @@ import org.bukkit.event.HandlerList;
 import java.util.List;
 import java.util.UUID;
 
-/** Event called when {@link io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter#read(UUID)}. */
+/** Event called when {@link PlayerDataReadWriter#read(UUID)}. */
 public class PlayerDataReadEvent extends Event implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
 

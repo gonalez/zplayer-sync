@@ -18,10 +18,10 @@ package io.github.gonalez.zplayersync;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.gonalez.zplayersync.data.value.ConnectionFactory;
-import io.github.gonalez.zplayersync.data.value.PlayerDataReadWriter;
-import io.github.gonalez.zplayersync.data.value.PlayerDataApi;
-import io.github.gonalez.zplayersync.data.value.SQLPlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.ConnectionFactory;
+import io.github.gonalez.zplayersync.data.PlayerDataReadWriter;
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
+import io.github.gonalez.zplayersync.data.SQLPlayerDataReadWriter;
 import io.github.gonalez.zplayersync.serializer.ObjectSerializer;
 
 import javax.annotation.Nullable;

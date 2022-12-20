@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.data.value;
+package io.github.gonalez.zplayersync.data;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import com.google.common.collect.ImmutableList;
 
-/** Factory to create sql connections. */
-public interface ConnectionFactory {
+import java.util.UUID;
 
-  /**
-   * Creates and establish a new sql connection, throws an
-   * {@link SQLException} if failed to establish connection.
-   */
-  Connection create() throws SQLException;
+/** Interface for reading and writing data of {@link PlayerDataApi}s. */
+public interface PlayerDataReadWriter {
+  void open();
+  void close();
+
+  ImmutableList<PlayerDataApi<?>> read(UUID playerUUID);
+  void write(UUID playerUUID);
 }

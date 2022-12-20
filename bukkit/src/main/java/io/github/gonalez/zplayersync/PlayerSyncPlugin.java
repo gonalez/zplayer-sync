@@ -17,7 +17,7 @@ package io.github.gonalez.zplayersync;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import io.github.gonalez.zplayersync.data.value.*;
+import io.github.gonalez.zplayersync.data.*;
 import io.github.gonalez.zplayersync.serializer.InventorySerializer;
 import io.github.gonalez.zplayersync.serializer.LocationSerializer;
 import org.bukkit.Location;

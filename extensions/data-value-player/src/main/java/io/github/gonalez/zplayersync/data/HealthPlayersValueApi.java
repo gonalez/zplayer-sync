@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.zplayersync.data.value;
+package io.github.gonalez.zplayersync.data;
 
+import io.github.gonalez.zplayersync.data.PlayerDataApi;
 import org.bukkit.entity.Player;
 
-/** Value for level of players. */
-public class LevelPlayersValueApi implements PlayerDataApi<Integer> {
-  public static final String IDENTIFIER = "level";
+/** Value for health level of players. */
+public class HealthPlayersValueApi implements PlayerDataApi<Double> {
+  public static final String IDENTIFIER = "health";
 
   @Override
-  public Class<Integer> type() {
-    return Integer.class;
+  public Class<Double> type() {
+    return Double.class;
   }
 
   @Override
@@ -32,12 +33,12 @@ public class LevelPlayersValueApi implements PlayerDataApi<Integer> {
   }
 
   @Override
-  public Integer read(Player input) {
-    return input.getLevel();
+  public Double read(Player input) {
+    return input.getHealth();
   }
 
   @Override
-  public void set(Player input, Integer integer) {
-    input.setLevel(integer);
+  public void set(Player input, Double aDouble) {
+    input.setHealth(aDouble);
   }
 }

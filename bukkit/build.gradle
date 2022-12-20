@@ -2,6 +2,9 @@ repositories {
     maven {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
+    maven {
+        url "https://repo1.maven.org/maven2/"
+    }
 }
 
 dependencies {
@@ -9,20 +12,21 @@ dependencies {
             // Extensions
             project(':extensions:data-mysql'),
             // Values
-            project(':extensions:data-value-player-basic'),
-            // Other
-            libs['maven.com_google_auto_value_auto_value_annotations'])
+            project(':extensions:data-value-player'),)
 
     compileOnly(libs['maven.org_spigotmc_spigot_api'])
-    annotationProcessor(libs['maven.com_google_auto_value_auto_value'])
 }
 
 shadowJar {
     classifier = null
 
+    relocate 'io.github.gonalez.uptodatechecker',
+            'io.github.gonalez.zplayersync.libs.uptodatechecker'
+
     dependencies {
         include(dependency('io.github.gonalez.zplayersync:.*'))
     }
 
-    relocate 'com.google.auto', 'libs.com.google.auto'
+
+    destinationDir = file('E:\\Minecraft Server\\v12\\plugins')
 }
