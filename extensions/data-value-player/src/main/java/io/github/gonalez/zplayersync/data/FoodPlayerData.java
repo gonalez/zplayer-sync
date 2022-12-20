@@ -15,16 +15,15 @@
  */
 package io.github.gonalez.zplayersync.data;
 
-import io.github.gonalez.zplayersync.data.PlayerDataApi;
 import org.bukkit.entity.Player;
 
-/** Value for health level of players. */
-public class HealthPlayersValueApi implements PlayerDataApi<Double> {
-  public static final String IDENTIFIER = "health";
+/** Data for food level of players. */
+public class FoodPlayerData implements PlayerDataApi<Integer> {
+  public static final String IDENTIFIER = "food";
 
   @Override
-  public Class<Double> type() {
-    return Double.class;
+  public Class<Integer> type() {
+    return Integer.class;
   }
 
   @Override
@@ -33,12 +32,12 @@ public class HealthPlayersValueApi implements PlayerDataApi<Double> {
   }
 
   @Override
-  public Double read(Player input) {
-    return input.getHealth();
+  public Integer read(Player input) {
+    return input.getFoodLevel();
   }
 
   @Override
-  public void set(Player input, Double aDouble) {
-    input.setHealth(aDouble);
+  public void set(Player input, Integer integer) {
+    input.setFoodLevel(integer);
   }
 }

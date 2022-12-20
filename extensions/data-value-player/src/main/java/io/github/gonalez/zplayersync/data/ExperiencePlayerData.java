@@ -15,17 +15,16 @@
  */
 package io.github.gonalez.zplayersync.data;
 
-import io.github.gonalez.zplayersync.data.PlayerDataApi;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-/** Value for location of players. */
-public class LocationPlayersValueApi implements PlayerDataApi<Location> {
-  public static final String IDENTIFIER = "location";
+/** Data for level experience of players. */
+public class ExperiencePlayerData implements PlayerDataApi<Float> {
+  public static final String IDENTIFIER = "experience";
+
 
   @Override
-  public Class<Location> type() {
-    return Location.class;
+  public Class<Float> type() {
+    return Float.class;
   }
 
   @Override
@@ -34,12 +33,12 @@ public class LocationPlayersValueApi implements PlayerDataApi<Location> {
   }
 
   @Override
-  public Location read(Player input) {
-    return input.getLocation();
+  public Float read(Player input) {
+    return input.getExp();
   }
 
   @Override
-  public void set(Player input, Location location) {
-    input.teleport(location);
+  public void set(Player input, Float aFloat) {
+    input.setExp(aFloat);
   }
 }

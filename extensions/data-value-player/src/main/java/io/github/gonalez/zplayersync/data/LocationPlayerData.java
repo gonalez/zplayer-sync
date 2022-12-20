@@ -15,16 +15,16 @@
  */
 package io.github.gonalez.zplayersync.data;
 
-import io.github.gonalez.zplayersync.data.PlayerDataApi;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-/** Value for food level of players. */
-public class FoodPlayersValueApi implements PlayerDataApi<Integer> {
-  public static final String IDENTIFIER = "food";
+/** Data for {@code Location}. */
+public class LocationPlayerData implements PlayerDataApi<Location> {
+  public static final String IDENTIFIER = "location";
 
   @Override
-  public Class<Integer> type() {
-    return Integer.class;
+  public Class<Location> type() {
+    return Location.class;
   }
 
   @Override
@@ -33,12 +33,12 @@ public class FoodPlayersValueApi implements PlayerDataApi<Integer> {
   }
 
   @Override
-  public Integer read(Player input) {
-    return input.getFoodLevel();
+  public Location read(Player input) {
+    return input.getLocation();
   }
 
   @Override
-  public void set(Player input, Integer integer) {
-    input.setFoodLevel(integer);
+  public void set(Player input, Location location) {
+    input.teleport(location);
   }
 }

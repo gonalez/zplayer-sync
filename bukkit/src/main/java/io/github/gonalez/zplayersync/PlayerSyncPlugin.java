@@ -66,12 +66,12 @@ public class PlayerSyncPlugin extends JavaPlugin {
       pluginModule.registerSerializer(Inventory.class, new InventorySerializer());
 
       ImmutableList.of(
-          new HealthPlayersValueApi(),
-          new FoodPlayersValueApi(),
-          new LocationPlayersValueApi(),
-          new InventoryPlayersValueApi(),
-          new LevelPlayersValueApi(),
-          new ExperiencePlayersValueApi())
+          new HealthPlayerData(),
+          new FoodPlayerData(),
+          new LocationPlayerData(),
+          new InventoryPlayerData(),
+          new LevelPlayerData(),
+          new ExperiencePlayerData())
           .forEach(valueApi ->
               pluginModule.initializePlayerValueApi(valueApi));
 

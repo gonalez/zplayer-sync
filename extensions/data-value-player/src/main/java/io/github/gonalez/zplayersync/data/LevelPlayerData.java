@@ -15,17 +15,15 @@
  */
 package io.github.gonalez.zplayersync.data;
 
-import io.github.gonalez.zplayersync.data.PlayerDataApi;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
-/** Value for inventory of players. */
-public class InventoryPlayersValueApi implements PlayerDataApi<Inventory> {
-  public static final String IDENTIFIER = "inventory";
+/** Data for level of players. */
+public class LevelPlayerData implements PlayerDataApi<Integer> {
+  public static final String IDENTIFIER = "level";
 
   @Override
-  public Class<Inventory> type() {
-    return Inventory.class;
+  public Class<Integer> type() {
+    return Integer.class;
   }
 
   @Override
@@ -34,12 +32,12 @@ public class InventoryPlayersValueApi implements PlayerDataApi<Inventory> {
   }
 
   @Override
-  public Inventory read(Player input) {
-    return input.getInventory();
+  public Integer read(Player input) {
+    return input.getLevel();
   }
 
   @Override
-  public void set(Player input, Inventory inventory) {
-    input.getInventory().setContents(inventory.getContents());
+  public void set(Player input, Integer integer) {
+    input.setLevel(integer);
   }
 }
